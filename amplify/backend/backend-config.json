@@ -1,0 +1,10 @@
+{
+  "auth": {
+    "podcastcontexta1999a2f": {
+      "service": "Cognito",
+      "providerPlugin": "awscloudformation",
+      "dependsOn": [],
+      "customAuth": false
+    }
+  }
+}
