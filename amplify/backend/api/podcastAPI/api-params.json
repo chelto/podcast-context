@@ -1,0 +1,66 @@
+{
+    "paths": [
+        {
+            "name": "/rssscan",
+            "lambdaFunction": "RSSScan",
+            "privacy": {
+                "private": true,
+                "auth": [
+                    "/POST",
+                    "/GET",
+                    "/PUT",
+                    "/PATCH"
+                ]
+            },
+            "policyResourceName": "/rssscan"
+        },
+        {
+            "name": "/creativeurl",
+            "lambdaFunction": "creativeURLPost",
+            "privacy": {
+                "private": true,
+                "auth": [
+                    "/POST",
+                    "/GET",
+                    "/PUT",
+                    "/PATCH"
+                ]
+            },
+            "policyResourceName": "/creativeurl"
+        }
+    ],
+    "resourceName": "podcastAPI",
+    "apiName": "podcastAPI",
+    "functionArns": [
+        {
+            "lambdaFunction": "RSSScan"
+        },
+        {
+            "lambdaFunction": "creativeURLPost"
+        }
+    ],
+    "privacy": {
+        "auth": 2,
+        "unauth": 0,
+        "authRoleName": "amplify-podcastcontext-dev-194023-authRole",
+        "unAuthRoleName": "amplify-podcastcontext-dev-194023-unauthRole"
+    },
+    "dependsOn": [
+        {
+            "category": "function",
+            "resourceName": "RSSScan",
+            "attributes": [
+                "Name",
+                "Arn"
+            ]
+        },
+        {
+            "category": "function",
+            "resourceName": "creativeURLPost",
+            "attributes": [
+                "Name",
+                "Arn"
+            ]
+        }
+    ]
+}
