@@ -1,0 +1,7 @@
+{
+    "tableName": "podcastDB",
+    "partitionKeyName": "id",
+    "partitionKeyType": "S",
+    "sortKeyName": "creativeurl",
+    "sortKeyType": "S"
+}

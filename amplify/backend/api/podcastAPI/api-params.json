@@ -25,8 +25,7 @@
                     "/PUT",
                     "/PATCH"
                 ]
-            },
-            "policyResourceName": "/creativeurl"
+            }
         }
     ],
     "resourceName": "podcastAPI",
@@ -62,5 +61,6 @@
                 "Arn"
             ]
         }
-    ]
+    ],
+    "uuid": "997d4295"
 }
