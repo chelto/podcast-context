@@ -1,5 +1,5 @@
 import os
-import time
+import datetime
 from flask_cors import CORS
 import json
 import boto3
@@ -19,29 +19,27 @@ table = ddb.Table('podcastDB-dev')
 def put_list_creativeurl():
     if request.method == 'GET':
         podcastUrls = table.scan()['Items']
-        print(jsonify(podcastUrls))
+        print(podcastUrls)
         podcastUrls_json = jsonify(podcastUrls)
-        return {"message": "Hello, this is a response from backend Lambda, the current time is " + str(time.time()*1000.0)}
-        # return podcastUrls_json
+        return podcastUrls_json
     else:
         creativeUrl = request.json.get('creativeurl')
         showName = request.json.get('showname')
         showId = request.json.get('showid')
         podcastEpisodeName = request.json.get('podcastepisodename')
-        timestamp = int(time.time()*1000.0)
+        timeStamp = str(datetime.datetime.now())
         guid = str(uuid.uuid4())
         
-        print(creativeUrl)
+        print ('xxxx   ' + (guid))
         table.put_item(
             Item={
+                'showname': showName,
                 'creativeurl': creativeUrl,
-                'guid': guid,
+                'id': guid,
+                'showid': showId,
+                'episodename': podcastEpisodeName,
+                'timestamp': timeStamp
+
             })
         return {"message": "creative url added"}
     
-    
-
-
-
-if __name__ == '__main__':
-    app.run(debug=True)

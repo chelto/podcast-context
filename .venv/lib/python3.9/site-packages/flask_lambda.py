@@ -39,14 +39,16 @@ __version__ = '0.0.4'
 
 def make_environ(event):
     environ = {}
-
-    for hdr_name, hdr_value in event['headers'].items():
+    print('event', event)
+    # key might be there but set to None
+    headers = event.get('headers', {}) or {}
+    for hdr_name, hdr_value in headers.items():
         hdr_name = hdr_name.replace('-', '_').upper()
         if hdr_name in ['CONTENT_TYPE', 'CONTENT_LENGTH']:
             environ[hdr_name] = hdr_value
             continue
 
-        http_hdr_name = 'HTTP_%s' % hdr_name
+        http_hdr_name = 'HTTP_{}'.format(hdr_name)
         environ[http_hdr_name] = hdr_value
 
     qs = event['queryStringParameters']
@@ -55,8 +57,12 @@ def make_environ(event):
     environ['PATH_INFO'] = event['path']
     environ['QUERY_STRING'] = urlencode(qs) if qs else ''
     environ['REMOTE_ADDR'] = event['requestContext']['identity']['sourceIp']
-    environ['HOST'] = '%(HTTP_HOST)s:%(HTTP_X_FORWARDED_PORT)s' % environ
+    environ['HOST'] = '{}:{}'.format(
+        environ.get('HTTP_HOST', ''),
+        environ.get('HTTP_X_FORWARDED_PORT', ''),
+    )
     environ['SCRIPT_NAME'] = ''
+    environ['SERVER_NAME'] = 'SERVER_NAME'
 
     environ['SERVER_PORT'] = environ['HTTP_X_FORWARDED_PORT']
     environ['SERVER_PROTOCOL'] = 'HTTP/1.1'
@@ -79,6 +85,7 @@ def make_environ(event):
 
 
 class LambdaResponse(object):
+
     def __init__(self):
         self.status = None
         self.response_headers = None
@@ -89,22 +96,34 @@ class LambdaResponse(object):
 
 
 class FlaskLambda(Flask):
+
     def __call__(self, event, context):
-        if 'httpMethod' not in event:
-            # In this "context" `event` is `environ` and
-            # `context` is `start_response`, meaning the request didn't
-            # occur via API Gateway and Lambda
-            return super(FlaskLambda, self).__call__(event, context)
+        try:
+            if 'httpMethod' not in event:
+                print('call as flask app')
+                # In this "context" `event` is `environ` and
+                # `context` is `start_response`, meaning the request didn't
+                # occur via API Gateway and Lambda
+                return super(FlaskLambda, self).__call__(event, context)
 
-        response = LambdaResponse()
+            print('call as aws lambda')
+            response = LambdaResponse()
 
-        body = next(self.wsgi_app(
-            make_environ(event),
-            response.start_response
-        ))
+            body = next(self.wsgi_app(
+                make_environ(event),
+                response.start_response
+            ))
 
-        return {
-            'statusCode': response.status,
-            'headers': response.response_headers,
-            'body': body
-        }
+            return {
+                'statusCode': response.status,
+                'headers': response.response_headers,
+                'body': body.decode('utf-8')
+            }
+
+        except Exception as e:
+            print('unexpected error', e)
+            return {
+                'statusCode': 500,
+                'headers': {},
+                'body': 'internal server error'
+            }
